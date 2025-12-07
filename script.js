@@ -4,7 +4,73 @@ const movieListDiv = document.getElementById('movie-list');
 const searchInput = document.getElementById('search-input');
 const form = document.getElementById('add-movie-form');
 
+const editModal = document.getElementById('edit-modal');
+const editForm = document.getElementById('edit-movie-form');
+const editId = document.getElementById('edit-id');
+const editTitle = document.getElementById('edit-title');
+const editGenre = document.getElementById('edit-genre');
+const editYear = document.getElementById('edit-year');
+const closeModalBtn = document.getElementById('close-modal-btn');
+
+const deleteModal = document.getElementById('delete-confirm-modal');
+const deleteName = document.getElementById('delete-movie-name');
+const deleteIdInput = document.getElementById('delete-id-input');
+const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
 let allMovies = [];
+
+function openEditModal(movie) {
+    editId.value = movie.id;
+    editTitle.value = movie.title;
+    editGenre.value = movie.genre;
+    editYear.value = movie.year;
+    editModal.classList.remove('hidden');
+}
+
+closeModalBtn.addEventListener('click', () => {
+    editModal.classList.add('hidden');
+});
+
+editForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const updatedMovie = {
+        title: editTitle.value.trim(),
+        genre: editGenre.value.trim(),
+        year: parseInt(editYear.value)
+    };
+
+    fetch(`${API_URL}/${editId.value}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedMovie)
+    })
+    .then(() => {
+        editModal.classList.add('hidden');
+        fetchMovies();
+    });
+});
+
+function openDeleteModal(movie) {
+    deleteIdInput.value = movie.id;
+    deleteName.textContent = `Are you sure you want to delete "${movie.title}"?`;
+    deleteModal.classList.remove('hidden');
+}
+
+cancelDeleteBtn.addEventListener('click', () => {
+    deleteModal.classList.add('hidden');
+});
+
+confirmDeleteBtn.addEventListener('click', () => {
+    fetch(`${API_URL}/${deleteIdInput.value}`, {
+        method: 'DELETE'
+    })
+    .then(() => {
+        deleteModal.classList.add('hidden');
+        fetchMovies();
+    });
+});
 
 function renderMovies(moviesToDisplay) {
     movieListDiv.innerHTML = '';
@@ -25,11 +91,11 @@ function renderMovies(moviesToDisplay) {
         `;
 
         movieElement.querySelector('.edit-btn').addEventListener('click', () => {
-            editMoviePrompt(movie.id, movie.title, movie.year, movie.genre);
+            openEditModal(movie);
         });
 
         movieElement.querySelector('.delete-btn').addEventListener('click', () => {
-            deleteMovie(movie.id);
+            openDeleteModal(movie);
         });
 
         movieListDiv.appendChild(movieElement);
@@ -42,15 +108,14 @@ function fetchMovies() {
         .then(movies => {
             allMovies = movies;
             renderMovies(allMovies);
-        })
-        .catch(error => console.error('Error fetching movies:', error));
+        });
 }
 
 fetchMovies();
 
 searchInput.addEventListener('input', () => {
     const searchTerm = searchInput.value.toLowerCase();
-    const filteredMovies = allMovies.filter(movie => 
+    const filteredMovies = allMovies.filter(movie =>
         movie.title.toLowerCase().includes(searchTerm) ||
         movie.genre.toLowerCase().includes(searchTerm)
     );
@@ -71,55 +136,8 @@ form.addEventListener('submit', (event) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newMovie)
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Failed to add movie');
-        return response.json();
-    })
     .then(() => {
         form.reset();
         fetchMovies();
-    })
-    .catch(error => console.error('Error adding movie:', error));
+    });
 });
-
-function editMoviePrompt(id, currentTitle, currentYear, currentGenre) {
-    const newTitle = prompt('Enter new Title:', currentTitle);
-    const newYearStr = prompt('Enter new Year:', currentYear);
-    const newGenre = prompt('Enter new Genre:', currentGenre);
-
-    if (newTitle && newYearStr && newGenre) {
-        const updatedMovie = {
-            title: newTitle.trim(),
-            year: parseInt(newYearStr),
-            genre: newGenre.trim()
-        };
-        updateMovie(id, updatedMovie);
-    }
-}
-
-function updateMovie(movieId, updatedMovieData) {
-    fetch(`${API_URL}/${movieId}`, {  
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedMovieData)
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Failed to update movie');
-        return response.json();
-    })
-    .then(() => {
-        fetchMovies();
-    })
-    .catch(error => console.error('Error updating movie:', error));
-}
-
-function deleteMovie(movieId) {
-    fetch(`${API_URL}/${movieId}`, {  
-        method: 'DELETE'
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Failed to delete movie');
-        fetchMovies();
-    })
-    .catch(error => console.error('Error deleting movie:', error));
-}

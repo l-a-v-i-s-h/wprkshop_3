@@ -2,26 +2,85 @@
 <html>
 <head>
     <title>Movie Manager</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <h1>Movie Collection Manager</h1>
+<body class="dark-theme">
 
-    <form id="add-movie-form">
-        <h3>Add New Movie</h3>
-        <input type="text" id="title" placeholder="Title" required>
-        <input type="text" id="genre" placeholder="Genre">
-        <input type="number" id="year" placeholder="Release Year" required>
-        <button type="submit">Add Movie</button>
-    </form>
+    <div id="app-container">
+        <header>
+            <h1>🎬 FilmVault: Movie Collection</h1>
+        </header>
 
-    <hr>
+        <div class="movie-management-grid">
 
-    <h2>Movie List</h2>
+            <div class="card">
+                <h3 class="add-movie-heading">Add New Movie</h3>
+                <form id="add-movie-form" class="form-spacing">
+                    <input type="text" id="title" placeholder="Title" required class="input-field">
+                    <input type="text" id="genre" placeholder="Genre (e.g., Sci-Fi, Crime)" class="input-field">
+                    <input type="number" id="year" placeholder="Release Year (e.g., 2023)" required min="1888" max="2100" class="input-field">
+                    <button type="submit" class="btn btn-submit">
+                        Add Movie to Vault
+                    </button>
+                </form>
+            </div>
 
-    <input type="text" id="search-input" placeholder="Search movies by title or genre">
+            <div class="card movie-list-container">
+                <h2>Movie List</h2>
 
-    <div id="movie-list"></div>
+                <input type="text" id="search-input" placeholder="Search movies by title or genre..." class="input-field">
 
+                <div id="movie-list" class="custom-scrollbar">
+                    <div id="loading-indicator">Loading movies...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="modal-header">Edit Movie Details</h3>
+            <form id="edit-movie-form" class="form-spacing">
+                <input type="hidden" id="edit-id">
+
+                <label for="edit-title" class="label">Title</label>
+                <input type="text" id="edit-title" required class="input-field">
+
+                <label for="edit-genre" class="label">Genre</label>
+                <input type="text" id="edit-genre" class="input-field">
+
+                <label for="edit-year" class="label">Release Year</label>
+                <input type="number" id="edit-year" required min="1888" max="2100" class="input-field">
+
+                <div class="modal-actions">
+                    <button type="button" id="close-modal-btn" class="btn btn-cancel">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-save">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="delete-confirm-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3 class="modal-header delete-header">Confirm Deletion</h3>
+            <p id="delete-movie-name">Are you sure you want to delete this movie?</p>
+            <input type="hidden" id="delete-id-input">
+
+            <div class="modal-actions">
+                <button type="button" id="cancel-delete-btn" class="btn btn-cancel">
+                    Cancel
+                </button>
+                <button type="button" id="confirm-delete-btn" class="btn btn-delete-confirm">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
+
 </html>
